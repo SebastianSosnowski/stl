@@ -41,4 +41,5 @@ void printMap(const std::array<std::array<uint8_t, width>, height>& bitmap) {
         }
         std::cout << "\n";
     }
+    std::cout << "\n";
 }

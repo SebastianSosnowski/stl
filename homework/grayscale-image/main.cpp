@@ -41,11 +41,18 @@ std::array<std::array<uint8_t, 32>, 32> generateNinja() {
 }
 
 int main() {
+    std::array<std::array<uint8_t, 10>, 3> input = {{{0, 0, 0, 1, 1, 2, 3, 0, 0, 0},
+                                                     {0, 0, 4, 4, 4, 1, 1, 1, 1, 1},
+                                                     {2, 2, 2, 2, 2, 1, 2, 2, 2, 2}}};
     // auto ninja = generateNinja();
-    // printMap(ninja);
-    // auto compressed = compressGrayscale(ninja);
-    // auto decompressed = decompressGrayscale(compressed);
-    // printMap(decompressed);
+
+    printMap(input);
+    auto compressed = compressGrayscale(input);
+    auto f = [](std::pair<uint8_t, uint8_t> p) { std::cout << "{" << (int)p.first << ", " << (int)p.second << "}, "; };
+    std::for_each(compressed.begin(), compressed.end(), f);
+    std::cout << "\n\n";
+    auto decompressed = decompressGrayscale(compressed);
+    printMap(decompressed);
 
     return 0;
 }
