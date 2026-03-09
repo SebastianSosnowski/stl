@@ -22,17 +22,12 @@ std::vector<std::pair<uint8_t, uint8_t>> compressGrayscale(
 
 std::array<std::array<uint8_t, width>, height> decompressGrayscale(
     const std::vector<std::pair<uint8_t, uint8_t>>& compressed_bitmap) {
-    std::array<std::array<uint8_t, width>, height> decompressed;
-    int row = 0, column = 0;
-    for (const auto& [value, count] : compressed_bitmap) {
-        std::fill_n(decompressed[row].begin() + column, count, value);
-        column += count;
-        if (column == width) {
-            column = 0;
-            row++;
-        }
-    }
-    // printMap(decompressed);
+    std::array<std::array<uint8_t, width>, height> decompressed{};
+    auto decompressed_it = decompressed[0].begin();
+    std::ranges::for_each(compressed_bitmap, [&decompressed_it](const auto& p) {
+        std::fill_n(decompressed_it, p.second, p.first);
+        std::advance(decompressed_it, p.second);
+    });
     return decompressed;
 }
 
