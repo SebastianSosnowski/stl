@@ -1,25 +1,27 @@
 #include "compression.hpp"
 
-std::vector<std::pair<uint8_t, uint8_t>> compressGrayscale(std::array<std::array<uint8_t, width>, height>& bitmap) {
-    std::vector<std::pair<uint8_t, uint8_t>> compressed;
-    for (int i = 0; i < height; i++) {
-        int count = 1, left = bitmap[i][0], right;
-        for (int j = 1; j < width; j++) {
-            right = bitmap[i][j];
-            if (right == left) {
-                count++;
-            } else {
-                compressed.push_back(std::make_pair(left, count));
-                left = right;
-                count = 1;
-            }
-        }
-        compressed.push_back(std::make_pair(left, count));  // push last pixel / series of pixels
+static void compressRow(const std::array<uint8_t, width>& row,
+                        std::vector<std::pair<uint8_t, uint8_t>>& compressed) {
+    auto pixel = row.begin();
+    while (pixel != row.end()) {
+        auto next =
+            std::find_if(pixel, row.end(), [&pixel](auto current) { return *pixel != current; });
+        auto count = std::distance(pixel, next);
+        compressed.emplace_back(*pixel, count);
+        pixel = next;
     }
+}
+
+std::vector<std::pair<uint8_t, uint8_t>> compressGrayscale(
+    std::array<std::array<uint8_t, width>, height>& bitmap) {
+    std::vector<std::pair<uint8_t, uint8_t>> compressed;
+    std::for_each(bitmap.begin(), bitmap.end(),
+                  [&compressed](const auto& row) { compressRow(row, compressed); });
     return compressed;
 }
 
-std::array<std::array<uint8_t, width>, height> decompressGrayscale(const std::vector<std::pair<uint8_t, uint8_t>>& compressed_bitmap) {
+std::array<std::array<uint8_t, width>, height> decompressGrayscale(
+    const std::vector<std::pair<uint8_t, uint8_t>>& compressed_bitmap) {
     std::array<std::array<uint8_t, width>, height> decompressed;
     int row = 0, column = 0;
     for (const auto& [value, count] : compressed_bitmap) {
