@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.11.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -18,7 +18,8 @@ FetchContent_MakeAvailable(googletest)
 project(insensitivePalindrom)
 enable_testing()
 
-add_executable(${PROJECT_NAME}-ut test.cpp) # add your cpp file here after test.cpp
+add_executable(${PROJECT_NAME} main.cpp palindrom.cpp)
+add_executable(${PROJECT_NAME}-ut test.cpp palindrom.cpp) # add your cpp file here after test.cpp
 # if this is problematic take a look into CMakeLists.txt files in other exercises
 
 add_compile_options(${PROJECT_NAME}-ut -Wall -Wextra -Wconversion -pedantic -Werror)
