@@ -1,11 +1,33 @@
-// Napisz program, który będzie sprawdzał, czy podany ciąg wyrazów jest palindromem. Program powinien ignorować znaki specjalne np. ,.?()[] (i nie tylko). Powinien również ignorować wielkość liter oraz białe znaki jak spacja czy znak nowej linii.
-
-// Wywnioskuj po testach jak nazwać funkcję. Stwórz własne pliki źródłowe i nagłówkowe i dodaj je do CMakeLists.txt, aby się budowały. Szczegóły w README.md do tego zadania.
-
-// Gotowe zadanie zgłoś na gałąź coders-school:insensitive-palindrom.
-
 #include "palindrom.hpp"
 
-bool is_palindrome(std::string palindrom) {
+static char my_tolower(char ch) {
+    return static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+}
+static bool my_isalnum(char ch) {
+    return std::isalnum(static_cast<unsigned char>(ch));
+}
+
+bool is_palindrome(std::string word) {
+    auto left = word.begin();
+    auto right = std::prev(word.end());
+    std::cout << *left << " " << *right << "\n";
+    while (left < right) {
+        if (!my_isalnum(*left)) {
+            left++;
+            continue;
+        }
+        if (!my_isalnum(*right)) {
+            right--;
+            continue;
+        }
+        auto l = my_tolower(*left);
+        auto r = my_tolower(*right);
+
+        if (l != r) {
+            return false;
+        }
+        left++;
+        right--;
+    }
     return true;
 }
