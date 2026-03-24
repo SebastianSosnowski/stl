@@ -6,5 +6,9 @@ double ArithmeticAverage(const std::vector<int>& first, const std::vector<int>& 
 }
 
 double Distance(const std::vector<int>& point1, const std::vector<int>& point2) {
-    return 0.0;
+    auto f = [](const auto& lhs, const auto& rhs) { 
+        double diff = lhs-rhs;
+        return diff * diff; };
+    auto sum_of_squares = std::transform_reduce(point1.begin(), point1.end(), point2.begin(), 0.0, std::plus<>(), f);
+    return std::sqrt(sum_of_squares);
 }
