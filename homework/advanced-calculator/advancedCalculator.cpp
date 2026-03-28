@@ -3,46 +3,72 @@
 struct InputData {
     double lhs = 0.0;
     double rhs = 0.0;
-    char operation = '0';
+    char operation = ' ';
 };
 
-InputData parse_input(std::string& in) {
-    std::array<char, 8> valid_operations{'+', '-', '*', '/', '%', '!', '^', '$'};
-    std::string lhs = "", mhs = "", rhs = "";
-    auto it = in.begin();
-
-    for (; it != in.end(); it++) {
-        if (isspace(*it))
-            continue;
-        if (std::find(valid_operations.begin(), valid_operations.end(), *it) != valid_operations.end()) {
-            mhs += *it;
-            break;
+static bool bad_character(const std::string& in) {
+    std::unordered_set<char> allowed{'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                                     '+', '-', '*', '/', '%', '^', '$', '!', '.',
+                                     ' '};
+    for (const auto& ch : in) {
+        if (!allowed.contains(ch)) {
+            return true;
         }
-        lhs += *it;
     }
-    for (; it != in.end(); it++) {
-        if (!isalnum(*it))
+    return false;
+}
+
+std::string::size_type find_operator(const std::string& in) {
+    const std::string operators = "+-*/%^$!";
+
+    for (std::string::size_type i = 0; i < in.size(); ++i) {
+        char c = in[i];
+        // jeśli pierwszy znak to '-' → może oznaczać liczbę ujemną
+        if (i == 0 && c == '-') {
             continue;
-        rhs += *it;
+        }
+
+        if (operators.find(c) != std::string::npos) {
+            return i;
+        }
     }
 
-    InputData data{};
+    return std::string::npos;
+}
+
+static std::string trim(std::string& str) {
+    auto first = str.find_first_not_of(' ');
+    if (first == std::string::npos)
+        ;
+    auto last = str.find_last_not_of(' ');
+
+    return str.substr(first, last - first + 1);
+}
+
+ErrorCode parse_input(const std::string& in, InputData& data, std::size_t operator_idx) {
+    std::string lhs = in.substr(0, operator_idx);
+    // trim(lhs);
+    std::string rhs = in.substr(operator_idx + 1);
+    // trim(rhs);
+    data.operation = in.at(operator_idx);
     try {
         data.lhs = std::stod(lhs);
     } catch (const std::invalid_argument& e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "First argument is not a number: " << lhs << " ";
+        return ErrorCode::BadFormat;
     }
     try {
         data.rhs = std::stod(rhs);
     } catch (const std::invalid_argument& e) {
-        std::cerr << e.what() << '\n';
+        if (!(data.operation == '!' && rhs.size() == 0)) {
+            std::cerr << "Second argument is not a number: " << rhs << " ";
+            return ErrorCode::BadFormat;
+        }
     }
-    data.operation = mhs[0];
 
-    return data;
-    // Input: 5 + 5 -> operacja dodawania dwóch liczb 5 i 5 -> output: 10.
-    // Input: 5 ^ 2 -> operacje potęgowania -> output 25.
-    // Input: 125 $ 3 -> operacja pierwiastka (sqrt za długie), pierwiastek sześcienny z 125 -> output: 5.
+    std::cout << "lhs, mhs,  rhs: " << lhs << ", " << in.at(operator_idx) << ", " << rhs << "\n";
+
+    return ErrorCode::OK;
 }
 
 double factorial(const int& n) {
@@ -61,14 +87,18 @@ ErrorCode process(std::string input, double* out) {
         {'!', [](const int& n, int) { return factorial(n); }},
     };
 
-    InputData parsed = parse_input(input);
+    if (bad_character(input)) {
+        return ErrorCode::BadCharacter;
+    }
+    auto op_index = find_operator(input);
+    if (op_index == std::string::npos) {
+        return ErrorCode::BadFormat;
+    }
+    InputData parsed;
+    ErrorCode result = parse_input(input, parsed, op_index);
+    if (result != ErrorCode::OK) {
+        return result;
+    }
     *out = op[parsed.operation](parsed.lhs, parsed.rhs);
-    std::cout << "Actual: " << *out << "\n";
-    // Funkcje kalkulatora
-    // Dodawanie, mnożenie, dzielenie, odejmowanie (+, * , / , -)
-    // Modulo (%)
-    // Obliczanie silni (!)
-    // Podnoszenie liczby do potęgi (^)
-    // Obliczanie pierwiastka ({2}lt;/code>)
-    return ErrorCode::OK;
+    return result;
 }

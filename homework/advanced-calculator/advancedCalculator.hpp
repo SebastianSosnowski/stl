@@ -7,6 +7,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <unordered_set>
 
 enum class ErrorCode {
     OK,
